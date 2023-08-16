@@ -14,3 +14,6 @@ The Required Apis <br>
 5- Delete User <br>
 6- Login User (using email & password returning a message welcome [username] )
 
+<br>
+required to use ORM like GORM & gin library.
+
