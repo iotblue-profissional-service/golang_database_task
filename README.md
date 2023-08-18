@@ -2,7 +2,7 @@ Interns First task
 
 It is required to create a database with one table User ( ID, Name, Email, Password, Age ), this service should provide 6 API calls using gin library & postgresql database.
 steps:<br>
-1- fork this repository. <br>
+1- create a new branch with your name. <br>
 2- write your code.<br> 
 3- make a postman collection to test it.<br>
 <br>
