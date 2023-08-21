@@ -22,7 +22,7 @@ type User struct {
 var db *gorm.DB
 var err error
 
-// the connection of database
+// ConnectDB the connection of database
 func ConnectDB() {
 	db, err = gorm.Open("postgres", "host = 'localhost' port = 5432  user = postgres dbname = FirstTask password = maryam sslmode=disable ")
 	if err != nil {
@@ -52,7 +52,7 @@ func main() {
 	router.GET("/getUser/:id", getUser)
 	router.GET("/getAllUsers", getAllUsers)
 	router.DELETE("/deleteUser/:id", deleteUser)
-	//router.GET("/HomePage", login)
+	router.POST("/HomePage", login)
 
 	err := router.Run(":8080")
 	if err != nil {
@@ -145,4 +145,24 @@ func deleteUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, "user deleted successfully")
 }
 
-//6- Login User (using email & password returning a message welcome [username] )
+// router.POST("/HomePage", login)
+// 6- Login User (using email & password returning a message welcome [username] )
+func login(ctx *gin.Context) {
+	var user User
+	var loginData struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	if err := ctx.ShouldBindJSON(&loginData); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"Error": "Bad Request"})
+		return
+	}
+
+	res := db.Where("email =? AND password =?  ", loginData.Email, loginData.Password).First(&user)
+	if res.Error != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"Error": " Can't Login ... Try Again"})
+		return
+	}
+	ctx.JSON(http.StatusOK, "user Logged successfully")
+}
