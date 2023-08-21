@@ -49,9 +49,9 @@ func main() {
 	//Routers
 	router.POST("/createUser", createUser)
 	router.PUT("/updateUser/:id", updateUser)
-	//router.GET("/getUser", getUser)
-	//router.GET("/getAllUsers", getAllUsers)
-	//router.DELETE("/deleteUser", deleteUser)
+	router.GET("/getUser/:id", getUser)
+	router.GET("/getAllUsers", getAllUsers)
+	router.DELETE("/deleteUser/:id", deleteUser)
 	//router.GET("/HomePage", login)
 
 	err := router.Run(":8080")
@@ -86,7 +86,7 @@ func createUser(ctx *gin.Context) {
 // 2- Update User
 func updateUser(ctx *gin.Context) {
 	var user User
-	var updateuser User
+	var UpUser User
 	userID := ctx.Param("id")
 	if err := db.First(&user, userID).Error; err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"Error": "user is not found"})
@@ -97,21 +97,52 @@ func updateUser(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(400, "invalid data..User is not defined")
 		return
 	}
-	err = json.Unmarshal(data, &updateuser)
+	err = json.Unmarshal(data, &UpUser)
 	if err != nil {
 		ctx.AbortWithStatusJSON(400, "Bad Request")
-	}
-
-	user.Name = updateuser.Name
-
-	if err := db.Save(&user).Error; err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"Error": "can't update the user"})
 		return
 	}
+
+	db.Model(&User{}).Updates(UpUser)
+
 	ctx.JSON(http.StatusOK, "user updated successfully")
 }
 
-//3- Get User
-//4- Get Users
-//5- Delete User
+// 3- Get User
+func getUser(ctx *gin.Context) {
+	userm := ctx.Param("id")
+	var user User
+	res := db.First(&user, userm)
+	if res.Error != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"Error": "user not found"})
+		return
+	}
+	ctx.JSON(http.StatusOK, res)
+
+}
+
+// 4- Get all Users
+func getAllUsers(ctx *gin.Context) {
+	var user []User
+	res := db.Find(&user)
+	if res.Error != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"Error": "users not found"})
+		return
+	}
+	ctx.JSON(http.StatusOK, res)
+
+}
+
+// 5- Delete User
+func deleteUser(ctx *gin.Context) {
+	var user User
+	userID := ctx.Param("id")
+	if err := db.First(&user, userID).Error; err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"Error": "user is not found"})
+		return
+	}
+	db.Delete(&user)
+	ctx.JSON(http.StatusOK, "user deleted successfully")
+}
+
 //6- Login User (using email & password returning a message welcome [username] )
